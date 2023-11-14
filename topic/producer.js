@@ -46,5 +46,8 @@ const receiveGameResult = async (topics) => {
 
 const args = process.argv.slice(2);
 const topics = args.length ? args : ['default_topic'];
-
+const text = {
+    item_id: "macbook",
+    text: "This is a sample message to send receiver to check the ordered Item Availablility",
+  };
 receiveGameResult(topics);

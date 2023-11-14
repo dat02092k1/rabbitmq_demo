@@ -5,6 +5,7 @@ const amqp_url_docker = 'amqp://localhost:5672';
 
 const sendGameResult = async (topic, score) => {
     try {
+        console.log(score);
         // 1. create connect
         const conn = await amqplib.connect(amqp_url_cloud);
         // 2. create channel
@@ -18,7 +19,7 @@ const sendGameResult = async (topic, score) => {
         })
         
         // 4. publish video 
-        await channel.publish(nameExchange, topic, Buffer.from(score.toString()));
+        await channel.publish(nameExchange, topic, Buffer.from(score.score.toString()));
 
         console.log(`[x] Sent game result: ${score} for topic: ${topic}`);
 
@@ -35,4 +36,9 @@ const args = process.argv.slice(2);
 const topic = args[0] || 'default_topic';
 const score = args[1] || Math.floor(Math.random() * 100) + 1;
 
-sendGameResult(topic, score);
+const payload = {
+    topic: args[0] || 'default_topic',
+    score: args[1] || Math.floor(Math.random() * 100) + 1,
+  };
+
+sendGameResult(topic, payload);
