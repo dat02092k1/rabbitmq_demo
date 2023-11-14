@@ -3,8 +3,9 @@ const amqplib = require('amqplib');
 const amqp_url_cloud = 'amqps://bwmvojah:MTVr-RxMmrPWcv02TIbUaF3Z0X8uVVNA@octopus.rmq3.cloudamqp.com/bwmvojah';
 const amqp_url_docker = 'amqp://localhost:5672';
 
-const receiveGameResult = async (topics) => {
+const sendGameResult = async (topic, score) => {
     try {
+        console.log(score);
         // 1. create connect
         const conn = await amqplib.connect(amqp_url_cloud);
         // 2. create channel
@@ -16,38 +17,30 @@ const receiveGameResult = async (topics) => {
         await channel.assertExchange(nameExchange, "topic", {
             durable: false
         })
+        
+        // 4. publish video 
+        await channel.publish(nameExchange, topic, Buffer.from(score.score.toString()));
 
-        // 4. create queue
-        const {queue} = await channel.assertQueue('', {
-            exclusive: true
-        })
+        console.log(`[x] Sent game result: ${score} for topic: ${topic}`);
 
-        // 5. bind queue
-        console.log(`Waiting for game results in queue ${queue} for topics: ${topics}`);
-
-        /**
-         * meaning: phù hợp với bất kỳ từ nào
-         # meaning: phù hợp với 1 or nhiều từ bất kỳ
-         */
-        console.log(`waiting queue ${queue} for topic ${topics}`);
-
-        topics.forEach(async key => {
-            await channel.bindQueue(queue, nameExchange, key);
-        })
-
-        // 4. publish  
-        await channel.consume(queue, (msg) => {
-            console.log(`User received a reward with a score: ${msg.content.toString()} for topic: ${msg.fields.routingKey}`);
-        });
+        setTimeout(() => {
+            conn.close();
+            process.exit(0);
+        }, 2000)
     } catch (error) {
-        console.error(error);
+        console.log(error);
     }
 }
 
 const args = process.argv.slice(2);
-const topics = args.length ? args : ['default_topic'];
-const text = {
-    item_id: "macbook",
-    text: "This is a sample message to send receiver to check the ordered Item Availablility",
+const topic = args[0] || 'default_topic';
+
+const score = args[1] || Math.floor(Math.random() * 100) + 1;
+
+const payload = {
+    topic: args[0] || 'default_topic',
+    score: args[1] || Math.floor(Math.random() * 100) + 1,
   };
-receiveGameResult(topics);
+
+sendGameResult(topic, payload);
+        
