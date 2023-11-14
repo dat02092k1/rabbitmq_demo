@@ -1,7 +1,6 @@
 const amqplib = require('amqplib');
 
 const amqp_url_cloud = 'amqps://bwmvojah:MTVr-RxMmrPWcv02TIbUaF3Z0X8uVVNA@octopus.rmq3.cloudamqp.com/bwmvojah';
-const amqp_url_docker = 'amqp://localhost:5672';
 
 const receiveGameResult = async (topics) => {
     try {
